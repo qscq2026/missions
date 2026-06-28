@@ -33,68 +33,7 @@ Missions turns a single AI assistant into a **self-managing engineering team** w
 ## Architecture
 
 <div align="center">
-<svg width="750" height="380" viewBox="0 0 750 380" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .box { rx: 8; ry: 8; }
-    .arrow { stroke: #888; stroke-width: 2; fill: none; marker-end: url(#arrow); }
-  </style>
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#888"/>
-    </marker>
-  </defs>
-
-  <!-- User -->
-  <rect x="275" y="10" width="200" height="42" class="box" fill="#1a1a2e"/>
-  <text x="375" y="37" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">👤 User / Human PM</text>
-
-  <line x1="375" y1="52" x2="375" y2="75" class="arrow"/>
-
-  <!-- SKILL.md -->
-  <rect x="225" y="78" width="300" height="42" class="box" fill="#e94560"/>
-  <text x="375" y="105" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">📋 SKILL.md — Entry Point</text>
-
-  <line x1="247" y1="120" x2="120" y2="155" class="arrow"/>
-  <line x1="375" y1="120" x2="375" y2="155" class="arrow"/>
-  <line x1="502" y1="120" x2="630" y2="155" class="arrow"/>
-
-  <!-- Three pillars -->
-  <rect x="20" y="158" width="200" height="60" class="box" fill="#16213e"/>
-  <text x="120" y="184" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">⚙️ scripts/</text>
-  <text x="120" y="204" text-anchor="middle" fill="#aaa" font-size="11">Lifecycle hooks</text>
-
-  <rect x="275" y="158" width="200" height="60" class="box" fill="#0f3460"/>
-  <text x="375" y="184" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">📜 references/</text>
-  <text x="375" y="204" text-anchor="middle" fill="#aaa" font-size="11">Role protocols · Config · Design</text>
-
-  <rect x="530" y="158" width="200" height="60" class="box" fill="#533483"/>
-  <text x="630" y="184" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">📋 assets/</text>
-  <text x="630" y="204" text-anchor="middle" fill="#aaa" font-size="11">Task cards · PR · Validation</text>
-
-  <line x1="120" y1="218" x2="375" y2="258" class="arrow"/>
-  <line x1="375" y1="218" x2="375" y2="258" class="arrow"/>
-  <line x1="630" y1="218" x2="375" y2="258" class="arrow"/>
-
-  <!-- Runtime -->
-  <rect x="175" y="262" width="400" height="48" class="box" fill="#1a1a2e" stroke="#e94560" stroke-width="2"/>
-  <text x="375" y="283" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">💾 .missions/ — Runtime State Machine</text>
-  <text x="375" y="300" text-anchor="middle" fill="#aaa" font-size="11">Created by agent at runtime</text>
-
-  <line x1="225" y1="310" x2="100" y2="345" class="arrow"/>
-  <line x1="375" y1="310" x2="375" y2="345" class="arrow"/>
-  <line x1="525" y1="310" x2="650" y2="345" class="arrow"/>
-
-  <!-- Bottom row -->
-  <rect x="10" y="348" width="180" height="30" class="box" fill="#27ae60"/>
-  <text x="100" y="368" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">config.yaml</text>
-
-  <rect x="285" y="348" width="180" height="30" class="box" fill="#3498db"/>
-  <text x="375" y="368" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">CONTRACT.md</text>
-
-  <rect x="560" y="348" width="180" height="30" class="box" fill="#9b59b6"/>
-  <text x="650" y="368" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">State folders (02→08)</text>
-</svg>
+  <img src="assets/diagram-architecture.svg" alt="Missions Architecture" width="750">
 </div>
 
 ---
@@ -102,67 +41,7 @@ Missions turns a single AI assistant into a **self-managing engineering team** w
 ## State Machine
 
 <div align="center">
-<svg width="750" height="400" viewBox="0 0 750 400" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .box { rx: 6; ry: 6; }
-  </style>
-
-  <!-- Center hub -->
-  <circle cx="375" cy="200" r="42" fill="#1a1a2e" stroke="#e94560" stroke-width="2.5"/>
-  <text x="375" y="194" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">File System</text>
-  <text x="375" y="210" text-anchor="middle" fill="#e94560" font-size="10">State Machine</text>
-
-  <!-- Left column -->
-  <rect x="40" y="20" width="150" height="40" class="box" fill="#16213e"/>
-  <text x="115" y="45" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">00-orchestrate</text>
-  <line x1="190" y1="40" x2="335" y2="167" stroke="#666" stroke-width="1.5" stroke-dasharray="4,3"/>
-
-  <rect x="40" y="85" width="150" height="40" class="box" fill="#0f3460"/>
-  <text x="115" y="110" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">01-contract</text>
-  <line x1="190" y1="105" x2="335" y2="180" stroke="#666" stroke-width="1.5" stroke-dasharray="4,3"/>
-
-  <rect x="40" y="150" width="150" height="40" class="box" fill="#27ae60"/>
-  <text x="115" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">02-ready ⏳</text>
-  <line x1="190" y1="170" x2="335" y2="195" stroke="#27ae60" stroke-width="2"/>
-
-  <rect x="40" y="215" width="150" height="40" class="box" fill="#f39c12"/>
-  <text x="115" y="240" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">03-running ▶️</text>
-  <line x1="190" y1="235" x2="335" y2="205" stroke="#f39c12" stroke-width="2"/>
-
-  <rect x="40" y="280" width="150" height="40" class="box" fill="#3498db"/>
-  <text x="115" y="305" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">04-review 👁️</text>
-  <line x1="190" y1="300" x2="335" y2="215" stroke="#3498db" stroke-width="2"/>
-
-  <!-- Right column -->
-  <rect x="560" y="85" width="150" height="40" class="box" fill="#27ae60"/>
-  <text x="635" y="110" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">05-done ✅</text>
-  <line x1="560" y1="105" x2="415" y2="180" stroke="#27ae60" stroke-width="2"/>
-
-  <rect x="560" y="150" width="150" height="40" class="box" fill="#e74c3c"/>
-  <text x="635" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">06-fix 🐛</text>
-  <line x1="560" y1="170" x2="415" y2="195" stroke="#e74c3c" stroke-width="2"/>
-
-  <rect x="560" y="215" width="150" height="40" class="box" fill="#9b59b6"/>
-  <text x="635" y="240" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">07-pr 📤</text>
-  <line x1="560" y1="235" x2="415" y2="205" stroke="#9b59b6" stroke-width="2"/>
-
-  <rect x="560" y="280" width="150" height="40" class="box" fill="#1a1a2e"/>
-  <text x="635" y="305" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">08-merged 🎉</text>
-  <line x1="560" y1="300" x2="415" y2="215" stroke="#666" stroke-width="1.5" stroke-dasharray="4,3"/>
-
-  <rect x="560" y="340" width="150" height="36" class="box" fill="#7f8c8d"/>
-  <text x="635" y="363" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">archive 📦</text>
-  <line x1="560" y1="358" x2="415" y2="225" stroke="#7f8c8d" stroke-width="1.5" stroke-dasharray="4,3"/>
-
-  <!-- Labels -->
-  <text x="275" y="178" fill="#27ae60" font-size="11" font-weight="bold">mv</text>
-  <text x="275" y="210" fill="#f39c12" font-size="11" font-weight="bold">mv</text>
-  <text x="275" y="248" fill="#3498db" font-size="11" font-weight="bold">mv</text>
-  <text x="495" y="178" fill="#27ae60" font-size="11" font-weight="bold">pass</text>
-  <text x="495" y="210" fill="#e74c3c" font-size="11" font-weight="bold">fail</text>
-  <text x="495" y="248" fill="#9b59b6" font-size="11" font-weight="bold">PR</text>
-</svg>
+  <img src="assets/diagram-state-machine.svg" alt="Missions State Machine" width="750">
 </div>
 
 ### State Transitions
