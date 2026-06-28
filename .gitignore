@@ -1,0 +1,15 @@
+# Missions — Multi-Agent Software Engineering Framework
+# https://agentskills.io
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Editor
+.idea/
+.vscode/
+*.sublime-*
+
+# Runtime (created by the skill when it runs)
+.missions/
