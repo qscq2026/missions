@@ -15,6 +15,24 @@ created: {{created_at}}
 - **Read**: `AGENTS.md` Worker section + `CONTRACT.md` assertions {{contract_assertions}}
 - **Project**: {{project.language}} + {{project.framework}}
 
+## Experience Check（MUST complete before starting）
+
+- [ ] Read `.missions/logs/experience/INDEX.md`
+- [ ] Search for experiences in category: {{task_category}}
+- [ ] Search for experiences matching assertions: {{contract_assertions}}
+- [ ] Apply any relevant patterns
+- [ ] Avoid any documented anti-patterns
+
+### Relevant Experiences Found:
+{{#each relevant_experiences}}
+- [{{id}}]({{path}}): {{title}} ({{type}})
+{{/each}}
+
+### Warnings:
+{{#each relevant_anti_patterns}}
+⚠️ **{{title}}**: {{description}}
+{{/each}}
+
 ## Requirements
 {{#if roles.worker.enforce_tdd}}
 1. **Write tests first** covering assertions:
@@ -36,6 +54,7 @@ created: {{created_at}}
 - [ ] Coverage ≥ {{roles.worker.min_coverage}}%
 - [ ] Git committed
 - [ ] Handoff filled
+- [ ] **Experience applied logged**
 
 ### Git Commit
 ```
@@ -45,6 +64,13 @@ Message:
 
 ### Issues & Compromises
 <!-- Traps, technical debt, known limitations -->
+
+### Experience Applied
+<!-- Which experiences from logs/experience/ were used -->
+- Experiences read: {{experiences_read_count}}
+- Patterns applied: {{patterns_applied}}
+- Anti-patterns avoided: {{anti_patterns_avoided}}
+- New issues to record: {{new_issues_for_experience}}
 
 ---
 

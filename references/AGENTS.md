@@ -23,7 +23,12 @@
 ### Workflow
 
 1. **Read context**: Load `config.yaml` if it exists. Check for existing `.missions/` state.
-2. **Clarify**: Ask the user up to 3 focused questions about technical choices (e.g., database, framework, auth method). Do not ask "what do you want" — ask "PostgreSQL or SQLite?"
+2. **Read experience**: If `.missions/logs/experience/INDEX.md` exists:
+   - Read the INDEX
+   - Note any critical anti-patterns related to the project type
+   - Note successful patterns for similar architectures
+   - Apply lessons to planning (e.g., "Previous missions learned to separate auth service, I'll plan accordingly")
+3. **Clarify**: Ask the user up to 3 focused questions about technical choices (e.g., database, framework, auth method). Do not ask "what do you want" — ask "PostgreSQL or SQLite?"
 3. **Lock CONTRACT**: Write `.missions/CONTRACT.md` with:
    - Global constraints (e.g., "All APIs return JSON", "Coverage ≥ 80%")
    - Behavioral assertions (ID, Behavior, Tool, Evidence)
@@ -57,6 +62,12 @@
    - The task card in `03-running/`
    - `CONTRACT.md` assertions linked to this feature
    - `config.yaml` for project constraints
+   - **Experience**: If `.missions/logs/experience/INDEX.md` exists:
+     - Read INDEX and filter by task category
+     - Read top 3 relevant experiences (patterns + anti-patterns + fixes)
+     - Apply learned patterns BEFORE writing code
+     - Avoid documented anti-patterns
+3. **TDD cycle** (if `enforce_tdd: true` in config):
 3. **TDD cycle** (if `enforce_tdd: true` in config):
    - Write tests first, covering all linked assertions
    - Run tests — expect failure
@@ -91,7 +102,11 @@
 ### Workflow
 
 1. **Read contract**: Load `CONTRACT.md`. Read ONLY the assertions linked to this feature.
-2. **Read evidence**: Load the task card from `04-review/`. Read ONLY:
+2. **Read experience**: If `.missions/logs/experience/INDEX.md` exists:
+   - Read validation-related anti-patterns (e.g., "Self-Evaluating Tests")
+   - Check if current task type has known validation pitfalls
+   - Apply stricter checks for previously missed issues
+3. **Read evidence**: Load the task card from `04-review/`. Read ONLY:
    - The `## Handoff` section (commands run, test output, commit hash)
    - Git diff of the commit
 3. **Do NOT read**: Worker reasoning, implementation details, or conversation history
@@ -150,6 +165,143 @@
 - Generate Markdown only — human handles the actual PR
 
 ---
+
+
+---
+
+## Role: Logger（审计记录员）
+
+**When to activate**: After every state transition, after every role execution, AND on every restart.
+
+**Goal**: Maintain complete, structured audit trail of all agent activities.
+
+### Workflow
+
+1. **On every transition**: Record:
+   - Timestamp
+   - From state → To state
+   - Task ID
+   - Agent role
+   - Action taken
+   - Token usage (input/output/cached)
+   - Duration
+
+2. **On role completion**: Append to `.missions/logs/audit/YYYY-MM-DD.md`:
+   - Role name
+   - Task ID
+   - Start/end time
+   - Commands executed with exit codes
+   - Files modified
+   - Issues encountered
+   - Decisions made
+
+3. **On milestone completion**: Generate `.missions/logs/metrics/{mission_id}.yaml`:
+   - Total agent runs per role
+   - Total tokens consumed
+   - Average task duration
+   - Fix rate (fixes / total features)
+   - Coverage evolution
+   - Blocking issue distribution
+
+4. **On mission completion**: Generate `.missions/logs/audit/summary.md`:
+   - Complete timeline
+   - All state transitions
+   - All human interventions
+   - Final metrics
+
+### Constraints
+
+- Do NOT modify task cards or source code
+- Do NOT delete old logs
+- Append-only to audit files
+- Use UTC timestamps
+- MUST record which experiences were applied in each task execution
+- On restart, MUST record: "RESTART detected at {timestamp}. Resuming from state: {state}"
+- On restart, MUST append experience usage to audit log
+
+---
+
+## Role: Experience Curator（经验策展人）
+
+**When to activate**: After mission completion, or when a blocking issue is resolved.
+
+**Goal**: Extract reusable knowledge from execution history to prevent repeated mistakes and accelerate future work.
+
+### Workflow
+
+1. **Read audit logs**: Load `.missions/logs/audit/` for the completed mission.
+2. **Identify patterns**:
+   - What worked well? (success patterns)
+   - What failed repeatedly? (anti-patterns)
+   - What fixes were applied? (fix strategies)
+3. **Match against existing**: Before creating new experience, check if similar exists
+   - If similar exists: merge, increment `apply_count`, update `last_applied`
+   - If new: create new record with `apply_count: 0`
+4. **Create experience records** in `.missions/logs/experience/`:
+   - `patterns/` — Proven successful approaches
+   - `anti-patterns/` — Things to avoid
+   - `fixes/` — Reusable fix strategies
+5. **Update index**: Regenerate `.missions/logs/experience/INDEX.md`
+6. **Tag and cross-reference**: Link related experiences
+7. **Tag tasks**: In task cards, add `## Experience Applied` section listing used experiences
+
+### Experience Record Structure
+
+```yaml
+id: EXP-2026-06-28-001
+type: anti-pattern  # pattern | anti-pattern | fix-strategy
+category: tdd       # tdd | validation | architecture | performance
+severity: major     # critical | major | minor | tip
+task_id: F-003
+mission_id: M1
+created: 2026-06-28T15:00:00Z
+last_applied: null
+apply_count: 0
+```
+
+### Content Template
+
+```markdown
+# Title: Brief description
+
+## Context
+When/where this occurred
+
+## What Happened
+Detailed description
+
+## Root Cause
+Why it happened
+
+## Solution / Pattern
+How to solve or what pattern to follow
+
+## Code Example
+```python
+# Example code
+```
+
+## Prevention
+How to avoid in future
+
+## Related
+- [EXP-2026-06-28-002](EXP-2026-06-28-002.md)
+```
+
+### Self-Improvement Loop
+
+Before starting a new task, the Worker reads:
+1. `.missions/logs/experience/INDEX.md` for relevant category
+2. Specific experience records matching the task type
+3. Applies learned patterns, avoids documented anti-patterns
+
+### Constraints
+
+- Do NOT create experiences for one-off issues
+- Only record patterns that appear ≥2 times or are critical
+- Update `last_applied` and `apply_count` when reused
+- Keep experiences concise (< 500 words)
+
 
 ## Role Extension (Optional)
 

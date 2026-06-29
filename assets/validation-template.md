@@ -33,6 +33,18 @@
 | {{@index}} | {{severity}} | {{assertion_id}} | {{description}} |
 {{/each}}
 
+### Experience Verification
+
+- [ ] Worker read experience INDEX before implementation
+- [ ] Worker applied relevant patterns (check Handoff)
+- [ ] No documented anti-patterns were repeated
+- [ ] If new issue found: flag for Experience Curator
+
+### New Experience Candidates
+{{#each new_experience_candidates}}
+- **{{type}}**: {{description}} (suggest recording as EXP-xxx)
+{{/each}}
+
 ### Verdict
 {{#if has_blocking}}
 ❌ **FAIL** — {{blocking_count}} blocking issues must be fixed
