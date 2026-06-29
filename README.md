@@ -22,7 +22,7 @@ Missions turns a single AI assistant into a **self-managing engineering team** w
 | Role | Responsibility |
 |------|---------------|
 | 🧠 **Orchestrator** | Plans, breaks down goals, locks validation contracts |
-| 🔧 **Worker** | Implements features using TDD with fresh context each time |
+| 🔧 **Worker** | Implements features using TDD with file-scoped context — no cross-role reasoning leaks |
 | 🕵️ **Validator** | Independently verifies without seeing implementation details |
 | 📝 **PR Author** | Summarizes evidence into human-readable PR descriptions |
 
@@ -64,8 +64,8 @@ Missions turns a single AI assistant into a **self-managing engineering team** w
 2. **No Long-term Memory** — Agents never rely on conversation history. All context passes through files.
 3. **Pre-locked Contracts** — Validation criteria are written **before** any code. No post-hoc test writing.
 4. **Absolute Separation** — Worker and Validator are different "personas". Validator never sees Worker reasoning.
-5. **Experience Pre-Load** (v1.1) — Every role loads relevant historical experiences before executing any task, preventing repeated mistakes and reusing proven patterns.
-6. **Self-Improvement Loop** (v1.1) — After each mission, the agent reviews logged experiences to continuously improve: avoid past blockers, reuse successful patterns, optimize token usage.
+5. **Experience Pre-Load** — Every role loads relevant historical experiences before executing any task, preventing repeated mistakes and reusing proven patterns, filtered by detected role and task type.
+6. **Self-Improvement Loop** — After each mission, the agent reviews logged experiences to continuously improve: avoid past blockers, reuse successful patterns, optimize token usage.
 
 ---
 
@@ -93,7 +93,7 @@ I want to build a FastAPI service with OAuth2 login and user management
 
 ### 3. Answer Clarification Questions
 
-The Orchestrator asks up to 3 questions (e.g., database choice, auth method). Answer them, then **step back** — the agents handle the rest.
+The Orchestrator asks up to 3 questions in priority order: first to confirm the milestone breakdown, then technical choices that affect assertion design, then tooling details. Answer them, then **step back** — the agents handle the rest.
 
 ### 4. Merge PRs
 
@@ -105,19 +105,32 @@ mv .missions/07-pr/PR-*.md .missions/08-merged/
 
 ---
 
-## ✨ New in v1.1
+## ✨ What's New
+
+### v2.0 Highlights
 
 | Feature | Description |
 |---------|-------------|
-| 🔄 **REACTIVATION Protocol** | Agent crash recovery and session restart — resume interrupted workflows without losing state |
-| 🛡️ **Security Auditor Role** | New built-in role for auth/crypto/payment feature reviews |
-| 📝 **Context Writer Role** | New extensible role for generating project documentation and knowledge artifacts |
+| 🎯 **Coverage Map Milestone Detection** | PR Author triggers via `coverage_map` key→feature-ID matching — no false positives |
+| 🧩 **Priority-Ordered Clarification** | Orchestrator questions follow strict priority: Q1 milestone scope → Q2 assertion impact → Q3 tooling details |
+| 🧹 **File-Scoped Worker Context** | Worker uses file-scoped context instead of "fresh start" — reads only its own protocol and relevant files |
+| 📋 **Contract Template** | New `assets/contract-template.md` gives Orchestrator a starting structure for CONTRACT.md |
+| 🔗 **Hierarchical Fix Tracking** | Fix cards now track `root_feature` + `fix_number` — audit chain integrity across multiple fix rounds |
+| ⚡ **Optimized Restart Sequence** | State detection moved before config/experience loading — experiences filtered by detected role |
+| 🧠 **Smarter Experience Curation** | Critical issues recorded on first occurrence; major/minor require ≥2 occurrences before recording |
+| 🚀 **Auto-Seed Bootstrap** | `bootstrap.sh` automatically copies seed experiences and contract template on project init |
+
+### Previously in v1.1
+
+| Feature | Description |
+|---------|-------------|
+| 🔄 **REACTIVATION Protocol** | Agent crash recovery and session restart |
+| 🛡️ **Security Auditor Role** | Built-in role for security-sensitive feature reviews |
+| 📝 **Context Writer Role** | Extensible role for documentation and knowledge artifacts |
 | 📊 **Audit Templates** | Structured security and quality audit report templates |
-| 🎯 **Experience System** | Experience cards (templates + index + examples) for capturing lessons learned |
-| 📈 **Metrics Tracking** | Quantitative success metrics template for measuring project outcomes |
-| ✅ **Startup Checklist** | Project initialization checklist to ensure consistent setup |
-| 🚑 **Recovery Sequences** | Enhanced WORKFLOW.md with rollback and restart transition sequences |
-| 🧩 **Example Experiences** | EXP-SEED-001/101/201 sample experience cards |
+| 🎯 **Experience System** | Experience cards (templates + index + examples) for lessons learned |
+| 📈 **Metrics Tracking** | Quantitative success metrics template |
+| ✅ **Startup Checklist** | Project initialization checklist |
 
 ---
 
@@ -193,6 +206,7 @@ missions/                          ← skill root
 │   └── examples/
 │       └── experience/            ← Sample experience cards
 ├── assets/
+│   ├── contract-template.md        ← CONTRACT.md starting structure
 │   ├── feature-template.md        ← Task card template
 │   ├── fix-template.md            ← Fix card template
 │   ├── pr-template.md             ← PR description template
@@ -222,7 +236,7 @@ missions/                          ← skill root
 ├── 06-fix/                        ← Pending fixes
 ├── 07-pr/                         ← PR descriptions
 ├── 08-merged/                     ← Merged PRs
-├── logs/                          ← v1.1: Audit trail & learning
+├── logs/                          ← Audit trail & learning
 │   ├── audit/*.md                 ← Execution history
 │   ├── metrics/*.yaml             ← Performance data
 │   └── experience/*.md            ← Learned patterns (INDEX.md + cards)
@@ -275,11 +289,11 @@ Follows the [agentskills.io](https://agentskills.io) specification — keeping t
 | CONTRACT not locked | Orchestrator didn't finish | Answer all clarification questions |
 | Worker stuck | Task too large | Reduce `max_lines_per_feature` in config |
 | Validator misses issues | `strict_mode` off | Set `roles.validator.strict_mode: true` |
-| No PR generated | Milestone incomplete | Wait for all features in `05-done/` |
+| No PR generated | Milestone not complete per `coverage_map` | Verify all feature IDs for the milestone exist in `05-done/` |
 
 ---
 
-## Restarting a Mission (v1.1)
+## Restarting a Mission
 
 The agent can **auto-resume** interrupted missions — no manual re-initialization needed.
 
@@ -291,11 +305,12 @@ Continue the worker task that was in progress
 ```
 
 The agent will automatically:
-1. Detect existing `.missions/` state
-2. Read `.missions/logs/experience/INDEX.md` for historical context
-3. Determine current state from folders (03-running → resume Worker, 04-review → resume Validator, etc.)
-4. Load relevant experiences matching the current task type
-5. Continue from where it left off
+1. Detect existing `.missions/` state **(first step — before reading config or experience)**
+2. Read `.missions/config.yaml` for project settings
+3. Read `.missions/logs/experience/INDEX.md` for historical context
+4. Filter experiences by the **detected role** (Worker/Validator/Fix) and task type — only the most relevant 3 are loaded
+5. Read `.missions/03-running/*.md` (if any) to recover partial task context
+6. Continue from where it left off, with experience applied
 
 ```bash
 # View experience that will be applied
@@ -310,9 +325,9 @@ cat .missions/logs/experience/INDEX.md
 
 ---
 
-## Audit & Experience (v1.1)
+## Audit & Experience
 
-Missions v1.1 introduces a structured learning system:
+Missions features a structured learning system:
 
 ### Audit Trail
 
@@ -352,15 +367,21 @@ Missions is not about making agents smarter. It's about making them **accountabl
 
 ### Comparison: Original vs agentskills.io Version
 
-| Dimension | Original Missions | Missions Skill (v1.1) |
+| Dimension | Original Missions | Missions Skill (v2.0) |
 |-----------|------------------|-----------------------|
 | Spec | None | ✅ **agentskills.io** compliant |
 | Config | None | ✅ **config.yaml** driven |
-| Templates | Hardcoded | ✅ **Overridable** assets/ (10 templates) |
+| Templates | Hardcoded | ✅ **Overridable** assets/ (11 templates incl. contract-template) |
 | Roles | 3 fixed | ✅ **4 + 2 extensible** (security-auditor, context-writer) |
 | Hooks | None | ✅ **scripts/** lifecycle |
+| Milestone Detection | Manual | ✅ **coverage_map** automatic detection |
 | Recovery | None | ✅ **REACTIVATION.md** crash recovery protocol |
 | Experience | None | ✅ **Experience system** (cards + index + examples) |
+| Experience Curation | Record all | ✅ **Severity-thresholded** (critical→immediate, major/minor→≥2 occurrences) |
+| Fix Tracking | Flat parent ID | ✅ **Hierarchical** (root_feature + fix_number + immediate parent) |
+| Worker Context | "Fresh start" | ✅ **File-scoped context** (reads only role protocol + relevant files) |
+| Clarification Order | Arbitrary | ✅ **Priority-ordered** (Q1 milestone → Q2 assertion → Q3 tooling) |
+| Restart Sequence | Config→experience→detect | ✅ **Detect→config→role-filtered experience** |
 | Cross-platform | Claude Code only | ✅ **Multi-platform** |
 | Progressive disclosure | None | ✅ **3-level loading** |
 
