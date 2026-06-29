@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Spec](https://img.shields.io/badge/Spec-agentskills.io-blue)](https://agentskills.io)
-[![Version](https://img.shields.io/badge/Version-1.0.0-green)]()
+[![Version](https://img.shields.io/badge/Version-1.1.0-green)]()
 [![Platform](https://img.shields.io/badge/Platform-Claude_Code|OpenClaw|Cursor-8A2BE2)]()
 
 </div>
@@ -103,6 +103,22 @@ mv .missions/07-pr/PR-*.md .missions/08-merged/
 
 ---
 
+## ✨ v1.1 新增功能
+
+| 功能 | 说明 |
+|------|------|
+| 🔄 **REACTIVATION 协议** | 智能体崩溃恢复与会话重启 — 中断的工作流可无缝恢复 |
+| 🛡️ **安全审计角色** | 新增内置角色，用于认证/加密/支付功能的安全审查 |
+| 📝 **上下文编写角色** | 新增可扩展角色，用于生成项目文档和知识产物 |
+| 📊 **审计模板** | 结构化的安全与质量审计报告模板 |
+| 🎯 **经验系统** | 经验卡片（模板 + 索引 + 示例）用于记录经验教训 |
+| 📈 **指标追踪** | 量化成功指标模板，用于衡量项目成果 |
+| ✅ **启动检查清单** | 项目初始化检查清单，确保一致的项目设置 |
+| 🚑 **恢复序列** | 增强的 WORKFLOW.md，包含回滚和重启转移序列 |
+| 🧩 **示例经验** | EXP-SEED-001/101/201 示例经验卡片 |
+
+---
+
 ## 人工介入点
 
 你只需要在 **4 个时机** 介入：
@@ -165,15 +181,24 @@ missions/                          ← skill 根目录
 ├── scripts/
 │   └── bootstrap.sh               ← 环境引导
 ├── references/
-│   ├── AGENTS.md                  ← 角色协议
+│   ├── AGENTS.md                  ← 角色协议（4 + 2 可扩展角色）
 │   ├── CONFIG.md                  ← 配置指南
 │   ├── PRINCIPLE.md               ← 设计哲学
-│   └── WORKFLOW.md                ← 状态机参考
-└── assets/
-    ├── feature-template.md        ← 任务卡片模板
-    ├── fix-template.md            ← 修复卡片模板
-    ├── pr-template.md             ← PR 描述模板
-    └── validation-template.md     ← 验证报告模板
+│   ├── REACTIVATION.md            ← 崩溃恢复与重启协议
+│   ├── WORKFLOW.md                ← 状态机 + 恢复序列
+│   └── examples/
+│       └── experience/            ← 示例经验卡片
+├── assets/
+│   ├── feature-template.md        ← 任务卡片模板
+│   ├── fix-template.md            ← 修复卡片模板
+│   ├── pr-template.md             ← PR 描述模板
+│   ├── validation-template.md     ← 验证报告模板
+│   ├── audit-template.md          ← 安全/质量审计模板
+│   ├── experience-template.md     ← 经验卡片模板
+│   ├── experience-index-template.md
+│   ├── metrics-template.md        ← 成功指标追踪
+│   └── startup-checklist.md       ← 项目初始化检查清单
+└── README.zh-CN.md                ← 本文件
 ```
 
 ### 运行时（由智能体生成）
@@ -256,13 +281,15 @@ Missions 不是为了把智能体变得更聪明。而是让它变得**可问责
 
 ### 对比：原版 vs agentskills.io 版
 
-| 维度 | 原版 Missions | Missions Skill (v1.0) |
+| 维度 | 原版 Missions | Missions Skill (v1.1) |
 |------|--------------|----------------------|
 | 规范 | 无 | ✅ **agentskills.io** 兼容 |
 | 配置 | 无 | ✅ **config.yaml** 驱动 |
-| 模板 | 硬编码 | ✅ **可覆盖** assets/ |
-| 角色 | 3 个固定 | ✅ **4 个 + 可扩展** |
+| 模板 | 硬编码 | ✅ **可覆盖** assets/（10 个模板） |
+| 角色 | 3 个固定 | ✅ **4 + 2 可扩展**（安全审计、上下文编写） |
 | 钩子 | 无 | ✅ **scripts/** 生命周期 |
+| 恢复机制 | 无 | ✅ **REACTIVATION.md** 崩溃恢复协议 |
+| 经验系统 | 无 | ✅ **经验卡片**（模板 + 索引 + 示例） |
 | 跨平台 | 仅 Claude Code | ✅ **多平台** |
 | 渐进式加载 | 无 | ✅ **3 级加载** |
 
@@ -274,4 +301,7 @@ Missions 不是为了把智能体变得更聪明。而是让它变得**可问责
 
 ## 更新日志
 
+- **v1.1.0** (2026-06-29): 新智能体协议。新增 REACTIVATION.md 崩溃恢复、
+  审计/经验/指标/启动检查清单模板、安全审计与上下文编写角色、
+  增强的 WORKFLOW.md 恢复/重启序列、示例经验卡片。
 - **v1.0.0** (2026-06-28): 初始发布。四个角色、文件系统状态机、PR 工作流、agentskills.io 兼容。
