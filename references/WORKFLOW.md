@@ -23,7 +23,7 @@
 04-review --[Validator passes]--> 05-done
 04-review --[Validator fails]--> 06-fix + archive
 06-fix --[Worker fixes]--> 04-review
-05-done --[Milestone complete]--> 07-pr (via PR Author)
+05-done --[Milestone complete per coverage_map]--> 07-pr (via PR Author)
 07-pr --[Human merges]--> 08-merged
 ```
 
@@ -194,7 +194,7 @@ Detect state folders
     │
     └──► All empty ──► Check 05-done/
          │
-         ├──► 05-done/ has milestone ──► Trigger PR Author
+         ├──► 05-done/ has milestone (verify via CONTRACT.md coverage_map) ──► Trigger PR Author
          │
          └──► 05-done/ empty ──► Mission complete or not started
               │

@@ -1,6 +1,6 @@
 # Experience Index
 
-> Auto-generated from `.missions/logs/experience/`
+> Maintained by Experience Curator. See `assets/experience-index-template.md` for format rules.
 > Last updated: 2026-06-28T16:00:00Z
 
 ## By Category

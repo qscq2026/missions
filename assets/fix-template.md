@@ -3,16 +3,18 @@ id: {{feature_id}}-fix-{{fix_number}}
 type: fix
 agent: worker
 milestone: {{milestone_id}}
-parent: {{feature_id}}
+root_feature: {{feature_id}}          # always the original F-xxx, never a prior fix card
+parent: {{immediate_parent_id}}       # F-xxx for fix-001; F-xxx-fix-NNN for subsequent rounds
+fix_number: {{fix_number}}            # sequential integer; increment per re-validation failure
 contract_assertions: {{contract_assertions}}
 ---
 
 # {{feature_id}}-fix-{{fix_number}}: Fix blocking issues in {{parent_title}}
 
 ## Context
-- **Parent**: {{feature_id}}
-- **Source**: Validator blocking issues in {{feature_id}} Validation Report
-- **Read**: `archive/{{feature_id}}.md` Validation Report
+- **Root feature**: {{feature_id}} (always the original task, for audit chain integrity)
+- **Immediate parent**: {{immediate_parent_id}} (the card this fix is responding to)
+- **Source**: Validator blocking issues — read `archive/{{immediate_parent_id}}.md` Validation Report
 
 ## Fixes Required
 {{#each blocking_issues}}

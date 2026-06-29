@@ -1,7 +1,13 @@
 # Experience Index
 
-> Auto-generated index of all lessons learned across missions.
-> Updated after each mission completion.
+> Maintained by Experience Curator. Updated after each milestone completion or blocking fix resolution.
+> Format is fixed — do not alter section headers or list syntax; agent relevance matching depends on this structure.
+>
+> **Maintenance rules**:
+> - Add new entries under the correct category and severity section.
+> - Each entry format: `- [EXP-ID](relative/path/EXP-ID.md): Title (severity)`
+> - Update "Most Applied" only when `apply_count` reaches a new high.
+> - "Recently Added" shows the 5 most recently created records.
 
 ## By Category
 

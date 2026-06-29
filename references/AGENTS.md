@@ -28,11 +28,24 @@
    - Note any critical anti-patterns related to the project type
    - Note successful patterns for similar architectures
    - Apply lessons to planning (e.g., "Previous missions learned to separate auth service, I'll plan accordingly")
-3. **Clarify**: Ask the user up to 3 focused questions about technical choices (e.g., database, framework, auth method). Do not ask "what do you want" — ask "PostgreSQL or SQLite?"
-4. **Lock CONTRACT**: Write `.missions/CONTRACT.md` with:
+3. **Clarify**: Ask the user up to 3 focused questions, allocated in strict priority order:
+   - **Q1 (mandatory)**: Confirm milestone划分 — present the proposed milestone breakdown and ask if the scope and sequencing match the user's expectations. This question is always asked first because milestone structure determines `coverage_map`, which is the hardest thing to change after CONTRACT is locked.
+   - **Q2 (if needed)**: Technical choices that affect assertion design — e.g., auth strategy (JWT vs session), storage backend, async vs sync architecture. Ask only if the choice materially changes what the behavioral assertions look like.
+   - **Q3 (if needed)**: Tooling / framework details — e.g., "PostgreSQL or SQLite?", "pytest or unittest?". Ask only if not inferable from `config.yaml` or project context.
+   
+   Do not ask "what do you want" — ask closed binary or small-choice questions. Do not ask about things already specified in `config.yaml`.
+4. **Lock CONTRACT**: Write `.missions/CONTRACT.md` using `assets/contract-template.md` as the starting structure. Fill in:
    - Global constraints (e.g., "All APIs return JSON", "Coverage ≥ 80%")
    - Behavioral assertions (ID, Behavior, Tool, Evidence)
-   - Coverage map (which assertions cover which features)
+   - `coverage_map` block (required — milestone completion detection depends on this):
+     ```yaml
+     coverage_map:
+       M1:
+         - F-001
+         - F-002
+       M2:
+         - F-003
+     ```
    - Status: `locked`, timestamp, version
 5. **Create milestones**: Write milestone definitions to `.missions/00-orchestrate/`.
 6. **Create task cards**: For each feature, write a card to `.missions/02-ready/` using the template from `assets/feature-template.md`.
@@ -57,8 +70,8 @@
 ### Workflow
 
 1. **Pick up task**: `mv .missions/02-ready/XXX.md .missions/03-running/XXX.md` (or from `06-fix/`)
-2. **Fresh start**: Forget all previous conversation. Read only:
-   - This role protocol
+2. **File-scoped context**: Read ONLY the following files — do not reference reasoning or outputs from other roles earlier in this session:
+   - This role protocol (AGENTS.md Worker section)
    - The task card in `03-running/`
    - `CONTRACT.md` assertions linked to this feature
    - `config.yaml` for project constraints
@@ -121,7 +134,10 @@
    - Verdict: `pass` or `fail`
 7. **Route**:
    - If **zero blocking**: `mv .missions/04-review/XXX.md .missions/05-done/XXX.md`
-   - If **blocking issues**: Create `.missions/06-fix/XXX-fix-001.md` using `assets/fix-template.md`, then `mv .missions/04-review/XXX.md .missions/archive/XXX.md`
+   - If **blocking issues**:
+     a. Create `.missions/06-fix/XXX-fix-NNN.md` using `assets/fix-template.md` (set `parent` = original feature ID, `fix_number` = next sequential integer)
+     b. `mv .missions/04-review/XXX.md .missions/archive/XXX.md`
+     c. **Invoke Experience Curator** (inline): flag new issue as an experience candidate if it is critical severity or has appeared before
 8. **Update dashboard**: Append status to `.missions/README.md`
 
 ### Constraints
@@ -135,17 +151,19 @@
 
 ## Role: PR Author
 
-**When to activate**: When all features of a milestone are in `05-done/`.
+**When to activate**: When all features of a milestone are confirmed complete via `CONTRACT.md` `coverage_map` (all feature IDs for the milestone are present in `05-done/`).
 
 **Goal**: Summarize all evidence into a human-readable PR description.
 
 ### Workflow
 
-1. **Collect**: Gather all `05-done/*.md` files for the completed milestone.
-2. **Read**: Load their Handoffs and Validation Reports.
-3. **Git summary**: Run `git log --oneline {milestone-start}..HEAD` and `git diff --stat`.
-4. **Coverage**: Run `pytest --cov` to get coverage metrics.
-5. **Generate PR**: Write `.missions/07-pr/PR-{milestone}.md` using `assets/pr-template.md`:
+1. **Read CONTRACT**: Load `.missions/CONTRACT.md` — extract `coverage_map` to identify which feature IDs belong to the current milestone, and `global_constraints` for the PR checklist.
+2. **Invoke Experience Curator** (inline): flag milestone completion as a candidate for pattern recording before generating the PR.
+3. **Collect**: Gather `05-done/*.md` files for the features listed in the milestone's `coverage_map` entry.
+4. **Read**: Load their Handoffs and Validation Reports.
+5. **Git summary**: Run `git log --oneline {milestone-start}..HEAD` and `git diff --stat`.
+6. **Coverage**: Read `config.yaml` → use `test_runner` / `coverage_tool` fields to run coverage. Default fallback: `pytest --cov`. Do NOT hardcode tool names.
+7. **Generate PR**: Write `.missions/07-pr/PR-{milestone}.md` using `assets/pr-template.md`:
    - Summary
    - Changes (file list)
    - Test coverage
@@ -153,8 +171,8 @@
    - Contract coverage matrix
    - Review notes (human attention points)
    - Merge checklist
-6. **Update dashboard**: Set status to "awaiting human review"
-7. **Stop**: Wait for human to create PR on GitHub and merge.
+8. **Update dashboard**: Set status to "awaiting human review"
+9. **Stop**: Wait for human to create PR on GitHub and merge.
 
 ### Constraints
 
@@ -170,7 +188,7 @@
 
 ## Role: Logger（审计记录员）
 
-**When to activate**: After every state transition, after every role execution, AND on every restart.
+**When to activate**: Automatically after every state transition (`mv` between state folders) and after every role completes its workflow. The active role is responsible for invoking Logger behavior inline — Logger is not a separate agent call but a record-keeping obligation woven into each role's final step. On restart, Logger MUST record a RESTART entry before any role resumes.
 
 **Goal**: Maintain complete, structured audit trail of all agent activities.
 
@@ -222,7 +240,7 @@
 
 ## Role: Experience Curator（经验策展人）
 
-**When to activate**: After mission completion, or when a blocking issue is resolved.
+**When to activate**: (a) After a milestone completes and before PR Author runs — invoked after moving all features to `05-done/`; (b) when Validator creates a blocking fix card (step 7c) — Validator flags the issue as an experience candidate inline at that point. Experience Curator runs inline, not as a separate agent session.
 
 **Goal**: Extract reusable knowledge from execution history to prevent repeated mistakes and accelerate future work.
 
@@ -296,9 +314,11 @@ Before starting a new task, the Worker reads:
 
 ### Constraints
 
-- Do NOT create experiences for one-off issues
-- Only record patterns that appear ≥2 times or are critical
-- Update `last_applied` and `apply_count` when reused
+- Record **critical** severity issues immediately on first occurrence
+- Record **major** or **minor** patterns only after they appear ≥2 times
+- Do NOT create experiences for one-off non-critical issues
+- Update `last_applied` and `apply_count` when reused (treat as reference statistics, not authoritative counts — non-atomic writes mean values may drift on crash/restart)
+- Relevance matching relies primarily on `category` and `severity`, not on `apply_count`
 - Keep experiences concise (< 500 words)
 
 

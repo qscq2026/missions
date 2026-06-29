@@ -13,7 +13,7 @@ compatibility: Designed for Claude Code and any agentskills.io-compatible agent.
 
 # Missions — Multi-Agent Software Engineering Framework
 
-> **Version**: 1.0.0 | **License**: MIT | **Spec**: agentskills.io
+> **Version**: 1.1.0 | **License**: MIT | **Spec**: agentskills.io
 
 ## What is Missions?
 
@@ -26,17 +26,12 @@ Missions is a **file-system-driven multi-agent framework** for software engineer
 
 ## When to use this skill
 
-Use Missions when:
-- Building a project with **multiple features or milestones**
-- You want **TDD enforced** and **independent code review**
-- You need **audit trails** of every decision (Handoffs, Validation Reports)
-- You want **minimal human intervention** — just answer clarification questions and merge PRs
-- Working on **long-running tasks** where context dilution is a risk
+Missions fits when a project has multiple features or milestones, requires TDD and independent validation, and benefits from a persistent audit trail across sessions.
 
 Do **not** use Missions for:
 - One-off scripts or quick prototypes (use `/goal` instead)
-- Tasks without clear acceptance criteria
-- Environments without git or file system access
+- Tasks without clear acceptance criteria — Orchestrator needs something concrete to lock into CONTRACT
+- Environments without git or file system access (`mv`, `ls`, and `cat` are required)
 
 ## Quick Start
 
@@ -70,7 +65,7 @@ The agent will automatically load this skill if the task matches the description
 
 ### 3. Answer Clarification Questions
 
-The Orchestrator will ask up to 3 questions (e.g., database choice, auth method). Answer them, then **step back** — the agents will handle the rest.
+The Orchestrator will ask up to 3 questions in priority order: first to confirm the milestone breakdown, then any technical choices that affect assertion design, then tooling details. Answer them, then **step back** — the agents will handle the rest.
 
 ### 4. Merge PRs
 
@@ -119,16 +114,16 @@ mv .missions/07-pr/PR-*.md .missions/08-merged/
 ```
 5. READ {baseDir}/references/REACTIVATION.md (reactivation protocol)
 6. READ .missions/README.md (current status)
-7. READ .missions/config.yaml (project config)
-8. READ .missions/logs/experience/INDEX.md (historical knowledge) ← CRITICAL
-9. READ relevant experiences based on detected state
-10. DETECT active state:
-    - 03-running/ → Resume Worker
-    - 04-review/ → Resume Validator
-    - 06-fix/ → Resume Worker (fix mode)
-    - 02-ready/ → Start Worker on next task
-    - 05-done/ + others empty → PR Author or new milestone
-    - all empty → Ask user for next milestone
+7. DETECT active state (authoritative priority order in references/WORKFLOW.md):
+    - 03-running/ not empty → Resume Worker
+    - 04-review/ not empty → Resume Validator
+    - 06-fix/ not empty    → Resume Worker (fix mode)
+    - 02-ready/ not empty  → Start Worker on next task
+    - 07-pr/ not empty     → STOP, notify human to merge
+    - all empty → check 05-done/ via coverage_map → PR Author or new milestone
+8. READ .missions/config.yaml (project config)
+9. READ .missions/logs/experience/INDEX.md ← CRITICAL
+10. READ relevant experiences filtered by detected state/role
 11. RESUME execution from detected state
 ```
 
@@ -157,10 +152,10 @@ LOOP:
   g. Update state
 
   CHECK milestone completion:
-    - Read CONTRACT.md Coverage Map (declares which features belong to each milestone)
+    - Read CONTRACT.md `coverage_map` block (see AGENTS.md Orchestrator step 4 for required format)
     - List all completed features in 05-done/
-    - For each milestone in Coverage Map:
-      IF all its features are in 05-done/ AND not yet in 07-pr/:
+    - For each milestone key in coverage_map:
+      IF all its feature IDs are present as files in 05-done/ AND not yet in 07-pr/:
         → This milestone is complete (declared by data)
         → Logger generates metrics
         → Experience Curator extracts patterns
@@ -185,9 +180,10 @@ Before executing ANY task, the active role MUST:
    Worker → patterns/tdd-*, patterns/architecture-*, fixes/*
    Validator → anti-patterns/validation-*, patterns/testing-*
    Orchestrator → patterns/planning-*, anti-patterns/scope-*
-3. READ specific experience records (top 3 most relevant)
+3. READ specific experience records (top 3 most relevant by category + severity)
 4. DOCUMENT in task card: "Experience Applied: [EXP-xxx]"
-5. AFTER execution: Update apply_count and last_applied
+5. AFTER execution: Update apply_count and last_applied as reference statistics
+   (non-atomic — values may drift; relevance selection does not depend on them)
 ```
 
 
@@ -209,6 +205,7 @@ missions/                          ← skill root (name must match)
 │   └── examples/
 │       └── experience/            ← sample experience cards
 └── assets/
+    ├── contract-template.md       ← CONTRACT.md starting structure (Orchestrator)
     ├── feature-template.md        ← task card template
     ├── fix-template.md            ← fix card template
     ├── pr-template.md             ← PR description template
@@ -284,13 +281,15 @@ Keep `SKILL.md` under 500 lines. Detailed reference material lives in `reference
 You only need to act at these 6 moments:
 
 1. **Start** — Provide the goal (or let the agent infer from project context)
-2. **Clarification** — Answer 1-3 questions from Orchestrator
+2. **Clarification** — Answer up to 3 questions from Orchestrator (Q1: milestone scope; Q2: assertion-affecting technical choices; Q3: tooling details)
 3. **Stuck task** — If a task hangs >20 min, run: `mv .missions/03-running/X.md .missions/02-ready/`
 4. **PR merge** — Review the generated PR description, create PR on GitHub, merge, then archive
 5. **Review experience** — After mission, review `.missions/logs/experience/` to validate learned patterns
 6. **Restart** — Tell the agent to resume (it auto-detects state and loads experience)
 
 ### Restarting a Mission
+
+State detection follows the priority order in `references/WORKFLOW.md` — that file is the **single authoritative source**; the Resume Mode summary above is a quick reference only.
 
 ```bash
 # Agent will auto-detect and resume. Just say:
@@ -327,120 +326,24 @@ cat .missions/logs/experience/INDEX.md
 Everything else is automatic.
 
 ## Audit & Experience
-## Restarting a Mission
 
-### When to Restart
-
-Restart when:
-- Previous session was interrupted (power loss, timeout, window closed)
-- You want to continue from where you left off
-- New day, same project
-- Agent lost context
-
-### Restart Sequence
-
-```
-1. READ {baseDir}/SKILL.md (this file)
-2. READ {baseDir}/references/AGENTS.md (all roles)
-3. READ {baseDir}/references/WORKFLOW.md (state machine rules)
-4. DETECT current state:
-   a. List all state folders (02-ready/, 03-running/, etc.)
-   b. Read .missions/README.md for current status
-   c. Read .missions/logs/audit/latest.md for context
-5. IF experience exists:
-   a. READ .missions/logs/experience/INDEX.md
-   b. READ relevant experiences for current task type
-6. ROUTE to appropriate role based on detected state
-7. CONTINUE execution from detected state
-```
-
-### State Detection Priority
+The full restart protocol, state detection priority, and experience loading sequence are documented in `references/REACTIVATION.md` and `references/WORKFLOW.md`. For log inspection:
 
 ```bash
-# Check in this order (highest priority first):
-ls .missions/03-running/    # If not empty → Worker was interrupted
-ls .missions/04-review/     # If not empty → Validator needed
-ls .missions/06-fix/        # If not empty → Fix needed
-ls .missions/02-ready/      # If not empty → New task available
-ls .missions/07-pr/         # If not empty → Human needs to merge
-ls .missions/05-done/       # If not empty → Check if milestone complete
-```
+# Today's execution
+cat .missions/logs/audit/$(date +%Y-%m-%d).md
 
-### Experience Loading on Restart
+# Mission summary
+cat .missions/logs/audit/summary.md
 
-When restarting, the agent MUST:
-
-1. **Check for experience**: `ls .missions/logs/experience/`
-2. **If experience exists**:
-   - Read `INDEX.md` to understand available knowledge
-   - Filter experiences by **relevance** to current task:
-     - Same category (tdd, validation, architecture)
-     - Same severity (critical, major)
-     - Similar task type (auth, api, database)
-   - Read top 3 most relevant experiences
-   - Apply lessons before starting work
-
-3. **If no experience**: Proceed with defaults from AGENTS.md
-
-### Example Restart Flow
-
-```
-User: "Continue from yesterday"
-
-Agent:
-  1. Detect: 03-running/F-003.md exists
-  2. Read: F-003.md handoff (partially complete)
-  3. Read: experience/INDEX.md
-  4. Find: EXP-SEED-001 (Mock External Dependencies)
-  5. Apply: "I see previous missions learned to mock DB. 
-             I'll apply this pattern for F-003."
-  6. Continue: Worker role, pick up F-003 from where left off
-```
-
-### Persistent State Files
-
-These files survive restarts and provide continuity:
-
-| File | Purpose | Updated By |
-|------|---------|-----------|
-| `README.md` | Live status dashboard | All roles |
-| `CONTRACT.md` | Locked validation criteria | Orchestrator (once) |
-| `logs/audit/*.md` | Execution history | Logger |
-| `logs/metrics/*.yaml` | Performance data | Logger |
-| `logs/experience/*.md` | Learned patterns | Experience Curator |
-| `05-done/*.md` | Completed tasks | Validator |
-| `08-merged/*.md` | Merged PRs | Human |
-
-### What NOT to Do on Restart
-
-- Do NOT start a new mission if state folders are not empty
-- Do NOT ignore partially completed tasks in `03-running/`
-- Do NOT skip reading experience if it exists
-- Do NOT ask clarification questions again (CONTRACT is already locked)
-- Do NOT re-generate task cards that already exist in `02-ready/`
-
-
-### Viewing Logs
-
-```bash
-# 查看最近执行记录
-cat .missions/logs/audit/2026-06-28.md
-
-# 查看成功率统计
+# Metrics
 cat .missions/logs/metrics/summary.yaml
 
-# 查看经验库
-cat .missions/logs/experience/patterns/tdd-success.md
+# Experience library
+cat .missions/logs/experience/INDEX.md
 ```
 
-### Self-Improvement Loop
-
-After each mission completes, the agent reads `logs/experience/` to:
-- Avoid previously encountered blocking issues
-- Reuse successful implementation patterns
-- Apply proven fix strategies
-- Optimize token usage based on historical data
-
+After each mission completes, the agent reads `logs/experience/` to avoid previously encountered blocking issues, reuse successful patterns, and apply proven fix strategies.
 ## Troubleshooting
 
 | Symptom | Cause | Fix |

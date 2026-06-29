@@ -74,15 +74,16 @@ STEP 0: 检测启动类型
 ├─────────────────────────────────────────────────────────────┤
 │  1. READ {baseDir}/SKILL.md                                  │
 │  2. READ .missions/README.md （获取当前状态）                │
-│  3. READ .missions/config.yaml （获取用户配置）              │
-│  4. *** READ .missions/logs/experience/INDEX.md ***          │
+│  3. DETECT active state folder（先 detect，再按角色过滤经验） │
+│  4. READ .missions/config.yaml （获取用户配置）              │
+│  5. *** READ .missions/logs/experience/INDEX.md ***          │
 │     └── 这是强制步骤，不可跳过                                │
-│  5. *** READ relevant experiences ***                        │
-│     └── 根据当前任务类型，读取相关经验                        │
-│  6. REPORT: "已加载 N 条经验，发现 X 条相关记录"             │
-│  7. READ .missions/03-running/*.md （恢复上下文）            │
-│  8. SWITCH to 对应角色（Worker/Validator/Fix）               │
-│  9. EXECUTE with experience applied                          │
+│  6. *** READ relevant experiences ***                        │
+│     └── 根据 step 3 检测到的角色和任务类型过滤               │
+│  7. REPORT: "已加载 N 条经验，发现 X 条相关记录"             │
+│  8. READ .missions/03-running/*.md （如有，恢复上下文）      │
+│  9. SWITCH to 对应角色（Worker/Validator/Fix）               │
+│ 10. EXECUTE with experience applied                          │
 └─────────────────────────────────────────────────────────────┘
 
 
