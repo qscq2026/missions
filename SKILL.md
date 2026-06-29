@@ -156,11 +156,20 @@ LOOP:
   f. Logger records role completion
   g. Update state
 
-IF milestone complete:
-  - Logger generates metrics
-  - Experience Curator extracts patterns
+  CHECK milestone completion:
+    - Read CONTRACT.md Coverage Map (declares which features belong to each milestone)
+    - List all completed features in 05-done/
+    - For each milestone in Coverage Map:
+      IF all its features are in 05-done/ AND not yet in 07-pr/:
+        → This milestone is complete (declared by data)
+        → Logger generates metrics
+        → Experience Curator extracts patterns
+        → SWITCH to PR Author role
+        → PR Author generates PR-{milestone}.md in 07-pr/
+        → Update dashboard: "awaiting human review"
+        → STOP loop, notify human
 
-IF mission complete:
+IF mission complete (all milestones done):
   - Logger generates audit summary
   - Experience Curator updates INDEX.md
   - STOP
