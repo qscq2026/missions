@@ -7,7 +7,7 @@ task_id: {{task_id}}
 mission_id: {{mission_id}}
 created: {{created_at}}
 last_applied: {{last_applied}}
-aply_count: {{apply_count}}
+apply_count: {{apply_count}}
 ---
 
 # {{title}}

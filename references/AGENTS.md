@@ -29,15 +29,15 @@
    - Note successful patterns for similar architectures
    - Apply lessons to planning (e.g., "Previous missions learned to separate auth service, I'll plan accordingly")
 3. **Clarify**: Ask the user up to 3 focused questions about technical choices (e.g., database, framework, auth method). Do not ask "what do you want" — ask "PostgreSQL or SQLite?"
-3. **Lock CONTRACT**: Write `.missions/CONTRACT.md` with:
+4. **Lock CONTRACT**: Write `.missions/CONTRACT.md` with:
    - Global constraints (e.g., "All APIs return JSON", "Coverage ≥ 80%")
    - Behavioral assertions (ID, Behavior, Tool, Evidence)
    - Coverage map (which assertions cover which features)
    - Status: `locked`, timestamp, version
-4. **Create milestones**: Write milestone definitions to `.missions/00-orchestrate/`.
-5. **Create task cards**: For each feature, write a card to `.missions/02-ready/` using the template from `assets/feature-template.md`.
-6. **Update dashboard**: Write `.missions/README.md` with initial status.
-7. **Stop**: Do not implement. Hand off to Worker.
+5. **Create milestones**: Write milestone definitions to `.missions/00-orchestrate/`.
+6. **Create task cards**: For each feature, write a card to `.missions/02-ready/` using the template from `assets/feature-template.md`.
+7. **Update dashboard**: Write `.missions/README.md` with initial status.
+8. **Stop**: Do not implement. Hand off to Worker.
 
 ### Constraints
 
@@ -67,7 +67,6 @@
      - Read top 3 relevant experiences (patterns + anti-patterns + fixes)
      - Apply learned patterns BEFORE writing code
      - Avoid documented anti-patterns
-3. **TDD cycle** (if `enforce_tdd: true` in config):
 3. **TDD cycle** (if `enforce_tdd: true` in config):
    - Write tests first, covering all linked assertions
    - Run tests — expect failure
@@ -109,21 +108,21 @@
 3. **Read evidence**: Load the task card from `04-review/`. Read ONLY:
    - The `## Handoff` section (commands run, test output, commit hash)
    - Git diff of the commit
-3. **Do NOT read**: Worker reasoning, implementation details, or conversation history
-4. **Run verification**:
+4. **Do NOT read**: Worker reasoning, implementation details, or conversation history
+5. **Run verification**:
    - Execute test suite
    - Run linters
    - Run type checkers
    - If configured, run E2E tests (playwright, etc.)
-5. **Fill Validation Report**: In the task card, complete `## Validation Report`:
+6. **Fill Validation Report**: In the task card, complete `## Validation Report`:
    - Test results (pass/fail)
    - Lint results
    - Issues table: severity (blocking/non-blocking/suggestion), description, related assertion
    - Verdict: `pass` or `fail`
-6. **Route**:
+7. **Route**:
    - If **zero blocking**: `mv .missions/04-review/XXX.md .missions/05-done/XXX.md`
    - If **blocking issues**: Create `.missions/06-fix/XXX-fix-001.md` using `assets/fix-template.md`, then `mv .missions/04-review/XXX.md .missions/archive/XXX.md`
-7. **Update dashboard**: Append status to `.missions/README.md`
+8. **Update dashboard**: Append status to `.missions/README.md`
 
 ### Constraints
 

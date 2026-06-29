@@ -187,18 +187,30 @@ Before executing ANY task, the active role MUST:
 ```
 missions/                          ← skill root (name must match)
 ├── SKILL.md                       ← this file (entry point)
+├── README.md                      ← English documentation
+├── README.zh-CN.md                ← Chinese documentation
 ├── scripts/
 │   └── bootstrap.sh               ← optional: environment setup
 ├── references/
-│   ├── AGENTS.md                  ← role protocols (Orchestrator/Worker/Validator/PR Author)
+│   ├── AGENTS.md                  ← role protocols (4 + 2 extensible roles)
 │   ├── CONFIG.md                  ← configuration guide
 │   ├── PRINCIPLE.md               ← design philosophy & deep dive
-│   └── WORKFLOW.md                ← state machine reference
+│   ├── REACTIVATION.md            ← crash recovery & restart protocol
+│   ├── WORKFLOW.md                ← state machine reference
+│   └── examples/
+│       └── experience/            ← sample experience cards
 └── assets/
     ├── feature-template.md        ← task card template
     ├── fix-template.md            ← fix card template
     ├── pr-template.md             ← PR description template
-    └── validation-template.md     ← validation report template
+    ├── validation-template.md     ← validation report template
+    ├── audit-template.md          ← security/quality audit template
+    ├── experience-template.md     ← experience card template
+    ├── experience-index-template.md
+    ├── metrics-template.md        ← success metrics tracking
+    ├── startup-checklist.md       ← project initialization checklist
+    ├── diagram-architecture.svg   ← architecture diagram
+    └── diagram-state-machine.svg  ← state machine diagram
 ```
 
 ## Runtime Structure (Created by Agent)

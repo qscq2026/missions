@@ -14,6 +14,12 @@ for dir in 00-orchestrate 01-contract 02-ready 03-running 04-review 05-done 06-f
     touch "${MISSIONS_DIR}/${dir}/.gitkeep"
 done
 
+# Create logs subdirectories for audit trail and experience
+for logdir in audit metrics experience/patterns experience/anti-patterns experience/fixes; do
+    mkdir -p "${MISSIONS_DIR}/logs/${logdir}"
+    touch "${MISSIONS_DIR}/logs/${logdir}/.gitkeep"
+done
+
 # Copy config template if not exists
 if [ ! -f "${MISSIONS_DIR}/config.yaml" ]; then
     echo "Creating default config.yaml..."
