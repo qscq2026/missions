@@ -4,7 +4,7 @@ description: Multi-agent software engineering framework with role separation, pr
 license: MIT
 metadata:
   author: Claude Code
-  version: "1.1.0"
+  version: "2.0.0"
   category: software-engineering
   tags: [multi-agent, tdd, validation, workflow, state-machine, audit, self-improvement]
   min_agent_version: "0.1.0"
@@ -13,7 +13,7 @@ compatibility: Designed for Claude Code and any agentskills.io-compatible agent.
 
 # Missions — Multi-Agent Software Engineering Framework
 
-> **Version**: 1.1.0 | **License**: MIT | **Spec**: agentskills.io
+> **Version**: 2.0.0 | **License**: MIT | **Spec**: agentskills.io
 
 ## What is Missions?
 
@@ -369,5 +369,6 @@ Missions is not about making agents smarter. It's about making them **accountabl
 
 ## Changelog
 
+- **v2.0.0** (2026-06-30): Claude修订版. State detection moved before config/experience reading (role-filtered). PR Author triggers via `coverage_map` key→feature-ID matching. Orchestrator questions priority-ordered (Q1: milestone scope → Q2: assertion impact → Q3: tooling details). Worker "Fresh start" replaced with "File-scoped context". New `assets/contract-template.md` for CONTRACT.md creation. Fix card template with `root_feature`/`fix_number`/hierarchical parent tracking. Restart section extracted from SKILL.md into REACTIVATION.md. Experience Curator severity thresholds: critical→record on first occurrence, major/minor→require ≥2 occurrences. `bootstrap.sh` auto-seeds experiences and contract template.
 - **v1.1.0** (2026-06-29): New agent protocol. Added REACTIVATION.md, audit/experience/metrics templates, startup checklist, example experiences (EXP-SEED-001/101/201), expanded AGENTS.md with security-auditor and context-writer roles, enhanced WORKFLOW.md with recovery and restart sequences.
 - **v1.0.0** (2026-06-28): Initial release. Four roles, file-system state machine, PR workflow, agentskills.io compliant.

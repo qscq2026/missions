@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Spec](https://img.shields.io/badge/Spec-agentskills.io-blue)](https://agentskills.io)
-[![Version](https://img.shields.io/badge/Version-1.1.0-green)]()
+[![Version](https://img.shields.io/badge/Version-2.0.0-green)]()
 [![Platform](https://img.shields.io/badge/Platform-Claude_Code|OpenClaw|Cursor-8A2BE2)]()
 
 </div>
@@ -372,6 +372,7 @@ Missions is not about making agents smarter. It's about making them **accountabl
 
 ## Changelog
 
+- **v2.0.0** (2026-06-30): Claude修订版. State detection moved before config/experience reading (role-filtered). PR Author triggers via `coverage_map` key→feature-ID matching. Orchestrator questions priority-ordered (Q1: milestone scope → Q2: assertion impact → Q3: tooling details). Worker "Fresh start" → "File-scoped context". New `assets/contract-template.md`. Fix card template with `root_feature`/`fix_number`/hierarchical parent tracking. Restart section extracted from SKILL.md into REACTIVATION.md. Experience Curator severity thresholds: critical→record first occurrence, major/minor→require ≥2. `bootstrap.sh` auto-seeds experiences and contract template.
 - **v1.1.0** (2026-06-29): New agent protocol. Added REACTIVATION.md crash recovery,
   audit/experience/metrics/startup templates, security-auditor and context-writer roles,
   enhanced WORKFLOW.md with recovery/restart sequences, example experiences.

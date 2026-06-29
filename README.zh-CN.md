@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Spec](https://img.shields.io/badge/Spec-agentskills.io-blue)](https://agentskills.io)
-[![Version](https://img.shields.io/badge/Version-1.1.0-green)]()
+[![Version](https://img.shields.io/badge/Version-2.0.0-green)]()
 [![Platform](https://img.shields.io/badge/Platform-Claude_Code|OpenClaw|Cursor-8A2BE2)]()
 
 </div>
@@ -372,6 +372,7 @@ Missions 不是为了把智能体变得更聪明。而是让它变得**可问责
 
 ## 更新日志
 
+- **v2.0.0** (2026-06-30): Claude修订版. 状态检测移至 config/experience 读取之前（按角色过滤）。PR Author 触发改为 `coverage_map` key → feature ID 精确匹配。Orchestrator 提问优先级排序（Q1: milestone 范围 → Q2: 断言影响 → Q3: 工具细节）。Worker "Fresh start" 改为 "File-scoped context"。新增 `assets/contract-template.md`。Fix card 模板加入 `root_feature`/`fix_number`/层次化 parent 追踪。RESTART 章节从 SKILL.md 剥离至 REACTIVATION.md。Experience Curator 严重度阈值：critical 首次即记录，major/minor 需≥2次。`bootstrap.sh` 自动 seed 经验库和合约模板。
 - **v1.1.0** (2026-06-29): 新智能体协议。新增 REACTIVATION.md 崩溃恢复、
   审计/经验/指标/启动检查清单模板、安全审计与上下文编写角色、
   增强的 WORKFLOW.md 恢复/重启序列、示例经验卡片。
