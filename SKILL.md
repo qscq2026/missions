@@ -117,7 +117,7 @@ mv .missions/07-pr/PR-*.md .missions/08-merged/
 ### Resume Mode (Existing Project)
 
 ```
-5. READ {baseDir}/references/RESUME.md (resume protocol)
+5. READ {baseDir}/references/REACTIVATION.md (reactivation protocol)
 6. READ .missions/README.md (current status)
 7. READ .missions/config.yaml (project config)
 8. READ .missions/logs/experience/INDEX.md (historical knowledge) ← CRITICAL

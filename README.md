@@ -64,6 +64,8 @@ Missions turns a single AI assistant into a **self-managing engineering team** w
 2. **No Long-term Memory** — Agents never rely on conversation history. All context passes through files.
 3. **Pre-locked Contracts** — Validation criteria are written **before** any code. No post-hoc test writing.
 4. **Absolute Separation** — Worker and Validator are different "personas". Validator never sees Worker reasoning.
+5. **Experience Pre-Load** (v1.1) — Every role loads relevant historical experiences before executing any task, preventing repeated mistakes and reusing proven patterns.
+6. **Self-Improvement Loop** (v1.1) — After each mission, the agent reviews logged experiences to continuously improve: avoid past blockers, reuse successful patterns, optimize token usage.
 
 ---
 
@@ -121,7 +123,7 @@ mv .missions/07-pr/PR-*.md .missions/08-merged/
 
 ## Human Intervention Points
 
-You only need to act at **4 moments**:
+You only need to act at **6 moments**:
 
 | Moment | Action |
 |--------|--------|
@@ -129,6 +131,8 @@ You only need to act at **4 moments**:
 | 💬 **Clarification** | Answer 1–3 questions from Orchestrator |
 | ⏸️ **Stuck task** | `mv .missions/03-running/X.md .missions/02-ready/` |
 | 🔀 **PR merge** | Review PR, create PR on GitHub, merge, archive |
+| 📖 **Review experience** | After mission, check `.missions/logs/experience/` to validate learned patterns |
+| 🔄 **Restart** | Just tell the agent to resume — it auto-detects state and loads experience |
 
 Everything else is **automatic**.
 
@@ -218,6 +222,10 @@ missions/                          ← skill root
 ├── 06-fix/                        ← Pending fixes
 ├── 07-pr/                         ← PR descriptions
 ├── 08-merged/                     ← Merged PRs
+├── logs/                          ← v1.1: Audit trail & learning
+│   ├── audit/*.md                 ← Execution history
+│   ├── metrics/*.yaml             ← Performance data
+│   └── experience/*.md            ← Learned patterns (INDEX.md + cards)
 └── archive/                       ← Historical records
 ```
 
@@ -268,6 +276,69 @@ Follows the [agentskills.io](https://agentskills.io) specification — keeping t
 | Worker stuck | Task too large | Reduce `max_lines_per_feature` in config |
 | Validator misses issues | `strict_mode` off | Set `roles.validator.strict_mode: true` |
 | No PR generated | Milestone incomplete | Wait for all features in `05-done/` |
+
+---
+
+## Restarting a Mission (v1.1)
+
+The agent can **auto-resume** interrupted missions — no manual re-initialization needed.
+
+```bash
+# Just tell the agent:
+/resume
+# Or describe what to continue:
+Continue the worker task that was in progress
+```
+
+The agent will automatically:
+1. Detect existing `.missions/` state
+2. Read `.missions/logs/experience/INDEX.md` for historical context
+3. Determine current state from folders (03-running → resume Worker, 04-review → resume Validator, etc.)
+4. Load relevant experiences matching the current task type
+5. Continue from where it left off
+
+```bash
+# View experience that will be applied
+cat .missions/logs/experience/INDEX.md
+```
+
+### What NOT to Do on Restart
+
+- ❌ Do **not** re-run `/missions` — this triggers fresh initialization
+- ❌ Do **not** manually re-lock CONTRACT.md — it's immutable after lock
+- ❌ Do **not** move files between state folders — let the agent handle transitions
+
+---
+
+## Audit & Experience (v1.1)
+
+Missions v1.1 introduces a structured learning system:
+
+### Audit Trail
+
+Every role execution is logged to `.missions/logs/audit/`:
+
+```bash
+# View latest audit entry
+cat .missions/logs/audit/latest.md
+```
+
+### Experience System
+
+The experience system captures lessons learned and reusable patterns:
+
+- **Experience cards** — Structured markdown files in `.missions/logs/experience/`
+- **INDEX.md** — Searchable index of all experiences with severity, category, and relevance tags
+- **Pre-load** — Every role automatically reads relevant experiences before executing any task
+- **Self-improvement** — After each mission, the agent reviews experiences to avoid past blockers and reuse successful patterns
+
+### Self-Improvement Loop
+
+After each mission completes, the agent reads `logs/experience/` to:
+- Avoid previously encountered blocking issues
+- Reuse successful implementation patterns
+- Apply proven fix strategies
+- Optimize token usage based on historical data
 
 ---
 
